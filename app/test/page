@@ -1,0 +1,10 @@
+export default function HomePage() {
+  return (
+    <main style={{ padding: 40 }}>
+      <h1>PartCheck homepage works</h1>
+      <p>
+        Go to <a href="/check">the checker</a>.
+      </p>
+    </main>
+  )
+}
