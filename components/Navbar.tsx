@@ -40,7 +40,7 @@ export function Navbar() {
                 color: '#111827',
               }}
             >
-              MTBBuild
+              PartCheck
             </div>
             <div
               style={{
