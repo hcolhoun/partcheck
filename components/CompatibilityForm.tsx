@@ -142,31 +142,13 @@ function ResultPanel({ result }: { result: CompatibilityResult }) {
 
   const panelStyle =
     result.status === 'compatible'
-      ? {
-          background: '#ecfdf5',
-          border: '1px solid #10b981',
-          color: '#065f46',
-        }
+      ? { background: '#ecfdf5', border: '1px solid #10b981', color: '#065f46' }
       : result.status === 'warning'
-      ? {
-          background: '#fffbeb',
-          border: '1px solid #f59e0b',
-          color: '#92400e',
-        }
-      : {
-          background: '#fef2f2',
-          border: '1px solid #ef4444',
-          color: '#991b1b',
-        }
+      ? { background: '#fffbeb', border: '1px solid #f59e0b', color: '#92400e' }
+      : { background: '#fef2f2', border: '1px solid #ef4444', color: '#991b1b' }
 
   return (
-    <section
-      style={{
-        padding: 20,
-        borderRadius: 12,
-        ...panelStyle,
-      }}
-    >
+    <section style={{ padding: 20, borderRadius: 12, ...panelStyle }}>
       <h2 style={{ marginTop: 0 }}>Result</h2>
 
       <p style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
@@ -227,9 +209,7 @@ function ResultPanel({ result }: { result: CompatibilityResult }) {
         </div>
       )}
 
-      {result.issues.length === 0 && (
-        <p style={{ marginBottom: 0 }}>No issues detected.</p>
-      )}
+      {result.issues.length === 0 && <p style={{ marginBottom: 0 }}>No issues detected.</p>}
     </section>
   )
 }
@@ -265,6 +245,7 @@ export function CompatibilityForm({
     cassette: false,
     derailleur: false,
     chainring: false,
+    bottomBracket: false,
   })
 
   const [custom, setCustom] = useState({
@@ -289,6 +270,13 @@ export function CompatibilityForm({
       drivetrain_family: '',
       offset_mm: '',
     },
+    bottomBracket: {
+      name: '',
+      spindle: '',
+      bb_shell: '',
+      shell_width_mm: '',
+      bearing_inner_diameter_mm: '',
+    },
   })
 
   const [result, setResult] = useState<CompatibilityResult | null>(null)
@@ -302,7 +290,7 @@ export function CompatibilityForm({
       !selected.shifter ||
       !selected.crankset ||
       (!customMode.chainring && !selected.chainring) ||
-      !selected.bottomBracket
+      (!customMode.bottomBracket && !selected.bottomBracket)
     ) {
       alert('Please select all required components')
       return
@@ -321,10 +309,12 @@ export function CompatibilityForm({
           shifterId: selected.shifter,
           cranksetId: selected.crankset,
           chainringId: customMode.chainring ? null : selected.chainring,
-          bottomBracketId: selected.bottomBracket,
+          bottomBracketId: customMode.bottomBracket ? null : selected.bottomBracket,
+
           customCassette: customMode.cassette ? custom.cassette : null,
           customDerailleur: customMode.derailleur ? custom.derailleur : null,
           customChainring: customMode.chainring ? custom.chainring : null,
+          customBottomBracket: customMode.bottomBracket ? custom.bottomBracket : null,
         }),
       })
 
@@ -367,10 +357,7 @@ export function CompatibilityForm({
             <SmallInput
               value={custom.cassette.name}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  cassette: { ...custom.cassette, name: e.target.value },
-                })
+                setCustom({ ...custom, cassette: { ...custom.cassette, name: e.target.value } })
               }
               placeholder="e.g. ZTTO 12-speed cassette"
             />
@@ -380,10 +367,7 @@ export function CompatibilityForm({
               type="number"
               value={custom.cassette.speed}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  cassette: { ...custom.cassette, speed: e.target.value },
-                })
+                setCustom({ ...custom, cassette: { ...custom.cassette, speed: e.target.value } })
               }
               placeholder="12"
             />
@@ -393,10 +377,7 @@ export function CompatibilityForm({
               type="number"
               value={custom.cassette.min_tooth}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  cassette: { ...custom.cassette, min_tooth: e.target.value },
-                })
+                setCustom({ ...custom, cassette: { ...custom.cassette, min_tooth: e.target.value } })
               }
               placeholder="10"
             />
@@ -406,10 +387,7 @@ export function CompatibilityForm({
               type="number"
               value={custom.cassette.max_tooth}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  cassette: { ...custom.cassette, max_tooth: e.target.value },
-                })
+                setCustom({ ...custom, cassette: { ...custom.cassette, max_tooth: e.target.value } })
               }
               placeholder="52"
             />
@@ -418,10 +396,7 @@ export function CompatibilityForm({
             <SmallSelect
               value={custom.cassette.freehub}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  cassette: { ...custom.cassette, freehub: e.target.value },
-                })
+                setCustom({ ...custom, cassette: { ...custom.cassette, freehub: e.target.value } })
               }
             >
               <option value="">Select freehub</option>
@@ -434,10 +409,7 @@ export function CompatibilityForm({
             <SmallSelect
               value={custom.cassette.chain_family}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  cassette: { ...custom.cassette, chain_family: e.target.value },
-                })
+                setCustom({ ...custom, cassette: { ...custom.cassette, chain_family: e.target.value } })
               }
             >
               <option value="">Select chain family</option>
@@ -482,10 +454,7 @@ export function CompatibilityForm({
             <SmallInput
               value={custom.derailleur.name}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  derailleur: { ...custom.derailleur, name: e.target.value },
-                })
+                setCustom({ ...custom, derailleur: { ...custom.derailleur, name: e.target.value } })
               }
               placeholder="e.g. Custom 12-speed derailleur"
             />
@@ -495,10 +464,7 @@ export function CompatibilityForm({
               type="number"
               value={custom.derailleur.speed}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  derailleur: { ...custom.derailleur, speed: e.target.value },
-                })
+                setCustom({ ...custom, derailleur: { ...custom.derailleur, speed: e.target.value } })
               }
               placeholder="12"
             />
@@ -508,10 +474,7 @@ export function CompatibilityForm({
               type="number"
               value={custom.derailleur.max_tooth}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  derailleur: { ...custom.derailleur, max_tooth: e.target.value },
-                })
+                setCustom({ ...custom, derailleur: { ...custom.derailleur, max_tooth: e.target.value } })
               }
               placeholder="52"
             />
@@ -520,10 +483,7 @@ export function CompatibilityForm({
             <SmallSelect
               value={custom.derailleur.actuation}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  derailleur: { ...custom.derailleur, actuation: e.target.value },
-                })
+                setCustom({ ...custom, derailleur: { ...custom.derailleur, actuation: e.target.value } })
               }
             >
               <option value="">Select actuation</option>
@@ -578,10 +538,7 @@ export function CompatibilityForm({
             <SmallInput
               value={custom.chainring.name}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  chainring: { ...custom.chainring, name: e.target.value },
-                })
+                setCustom({ ...custom, chainring: { ...custom.chainring, name: e.target.value } })
               }
               placeholder="e.g. 34T direct mount ring"
             />
@@ -591,10 +548,7 @@ export function CompatibilityForm({
               type="number"
               value={custom.chainring.tooth_count}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  chainring: { ...custom.chainring, tooth_count: e.target.value },
-                })
+                setCustom({ ...custom, chainring: { ...custom.chainring, tooth_count: e.target.value } })
               }
               placeholder="34"
             />
@@ -636,10 +590,7 @@ export function CompatibilityForm({
               type="number"
               value={custom.chainring.offset_mm}
               onChange={(e) =>
-                setCustom({
-                  ...custom,
-                  chainring: { ...custom.chainring, offset_mm: e.target.value },
-                })
+                setCustom({ ...custom, chainring: { ...custom.chainring, offset_mm: e.target.value } })
               }
               placeholder="3"
             />
@@ -655,6 +606,109 @@ export function CompatibilityForm({
             setSelected({ ...selected, bottomBracket: value })
           }
         />
+
+        <ToggleButton
+          active={customMode.bottomBracket}
+          onClick={() =>
+            setCustomMode({
+              ...customMode,
+              bottomBracket: !customMode.bottomBracket,
+            })
+          }
+          label={
+            customMode.bottomBracket
+              ? 'Using custom bottom bracket specs'
+              : '+ Enter custom bottom bracket specs'
+          }
+        />
+
+        {customMode.bottomBracket && (
+          <div style={{ marginTop: 10, padding: 12, border: '1px solid #e5e7eb', borderRadius: 8, background: '#fafafa' }}>
+            <SmallLabel>Name</SmallLabel>
+            <SmallInput
+              value={custom.bottomBracket.name}
+              onChange={(e) =>
+                setCustom({
+                  ...custom,
+                  bottomBracket: {
+                    ...custom.bottomBracket,
+                    name: e.target.value,
+                  },
+                })
+              }
+              placeholder="e.g. ZTTO DUB PF92 bottom bracket"
+            />
+
+            <SmallLabel>Spindle standard</SmallLabel>
+            <SmallSelect
+              value={custom.bottomBracket.spindle}
+              onChange={(e) =>
+                setCustom({
+                  ...custom,
+                  bottomBracket: {
+                    ...custom.bottomBracket,
+                    spindle: e.target.value,
+                  },
+                })
+              }
+            >
+              <option value="">Select spindle</option>
+              <option value="shimano-24mm">Shimano 24 mm</option>
+              <option value="dub">SRAM DUB</option>
+              <option value="30mm">30 mm</option>
+            </SmallSelect>
+
+            <SmallLabel>BB shell standard</SmallLabel>
+            <SmallSelect
+              value={custom.bottomBracket.bb_shell}
+              onChange={(e) =>
+                setCustom({
+                  ...custom,
+                  bottomBracket: {
+                    ...custom.bottomBracket,
+                    bb_shell: e.target.value,
+                  },
+                })
+              }
+            >
+              <option value="">Select shell</option>
+              <option value="bsa-68-73">BSA 68/73</option>
+              <option value="pf92">PF92</option>
+            </SmallSelect>
+
+            <SmallLabel>Shell width (mm)</SmallLabel>
+            <SmallInput
+              type="number"
+              value={custom.bottomBracket.shell_width_mm}
+              onChange={(e) =>
+                setCustom({
+                  ...custom,
+                  bottomBracket: {
+                    ...custom.bottomBracket,
+                    shell_width_mm: e.target.value,
+                  },
+                })
+              }
+              placeholder="92"
+            />
+
+            <SmallLabel>Bearing inner diameter (mm)</SmallLabel>
+            <SmallInput
+              type="number"
+              value={custom.bottomBracket.bearing_inner_diameter_mm}
+              onChange={(e) =>
+                setCustom({
+                  ...custom,
+                  bottomBracket: {
+                    ...custom.bottomBracket,
+                    bearing_inner_diameter_mm: e.target.value,
+                  },
+                })
+              }
+              placeholder="28.99 for DUB, 24 for Shimano"
+            />
+          </div>
+        )}
       </SectionCard>
 
       <div>

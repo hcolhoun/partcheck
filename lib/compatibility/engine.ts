@@ -107,6 +107,7 @@ export async function checkCompatibility({
   customCassette,
   customDerailleur,
   customChainring,
+  customBottomBracket,
 }: {
   cassetteId?: string | null
   chainId: string
@@ -114,10 +115,11 @@ export async function checkCompatibility({
   shifterId: string
   cranksetId: string
   chainringId?: string | null
-  bottomBracketId: string
+  bottomBracketId?: string | null
   customCassette?: any
   customDerailleur?: any
   customChainring?: any
+  customBottomBracket?: any
 }) {
   const issuesMap = new Map<string, Issue>()
 
@@ -125,20 +127,20 @@ export async function checkCompatibility({
     chain,
     shifter,
     crankset,
-    bottomBracket,
     rules,
     cassetteFromDb,
     derailleurFromDb,
     chainringFromDb,
+    bottomBracketFromDb,
   ] = await Promise.all([
     getPartDetails(chainId),
     getPartDetails(shifterId),
     getPartDetails(cranksetId),
-    getPartDetails(bottomBracketId),
     getCompatibilityRules(),
     cassetteId ? getPartDetails(cassetteId) : null,
     derailleurId ? getPartDetails(derailleurId) : null,
     chainringId ? getPartDetails(chainringId) : null,
+    bottomBracketId ? getPartDetails(bottomBracketId) : null,
   ])
 
   if (customCassette) {
@@ -175,9 +177,7 @@ export async function checkCompatibility({
     const missing = []
 
     if (isBlank(customChainring.tooth_count)) missing.push('tooth count')
-    if (isBlank(customChainring.chainring_mount)) {
-      missing.push('chainring mount')
-    }
+    if (isBlank(customChainring.chainring_mount)) missing.push('chainring mount')
     if (isBlank(customChainring.drivetrain_family)) {
       missing.push('drivetrain family')
     }
@@ -185,6 +185,23 @@ export async function checkCompatibility({
     addMissingFieldIssues(
       issuesMap,
       customChainring.name || 'Custom chainring',
+      missing
+    )
+  }
+
+  if (customBottomBracket) {
+    const missing = []
+
+    if (isBlank(customBottomBracket.spindle)) missing.push('spindle standard')
+    if (isBlank(customBottomBracket.bb_shell)) missing.push('BB shell standard')
+    if (isBlank(customBottomBracket.shell_width_mm)) missing.push('shell width')
+    if (isBlank(customBottomBracket.bearing_inner_diameter_mm)) {
+      missing.push('bearing inner diameter')
+    }
+
+    addMissingFieldIssues(
+      issuesMap,
+      customBottomBracket.name || 'Custom bottom bracket',
       missing
     )
   }
@@ -236,6 +253,23 @@ export async function checkCompatibility({
         },
       })
     : chainringFromDb
+
+  const bottomBracket = customBottomBracket
+    ? makeCustomPart({
+        id: 'custom-bottom-bracket',
+        name: customBottomBracket.name || 'Custom bottom bracket',
+        categorySlug: 'bottom-bracket',
+        attributes: {
+          shell_width_mm: customBottomBracket.shell_width_mm,
+          bearing_inner_diameter_mm:
+            customBottomBracket.bearing_inner_diameter_mm,
+        },
+        standards: {
+          spindle: customBottomBracket.spindle,
+          bb_shell: customBottomBracket.bb_shell,
+        },
+      })
+    : bottomBracketFromDb
 
   const parts = [
     cassette,
